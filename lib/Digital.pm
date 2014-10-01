@@ -1,5 +1,81 @@
+package Digital;
+# ABSTRACT: Handling conversion of digital values towards physical units
+
 use strict;
 use warnings;
-package Digital;
+use Package::Stash;
+use Module::Runtime qw( use_module );
+
+our %inputs;
+
+sub register_input {
+  my ( undef, $input, $input_class ) = @_;
+  unless (defined $input_class) {
+    $input_class = $input;
+    $input = lc($input_class);
+    $input =~ s!::!_!g;
+    $input =~ s!^digitalx_!!g;
+  }
+  $inputs{$input} = $input_class;
+}
+
+sub input {
+  my ( $class, $input, @args ) = @_;
+  my $input_class = $inputs{$input};
+  return $input_class->input(@args);
+}
+
+sub import {
+  my ( $class, @args ) = @_;
+  my ( $caller ) = caller;
+  my $stash = Package::Stash->new($caller);
+  my @classes;
+  for (@args) { unless (/^-/) {
+    push @classes, 'DigitalX::'.$_;
+  } }
+  for (@classes) {
+    use_module($_);
+  }
+  $stash->add_symbol('&input', sub { return $class->input(@_) });
+}
 
 1;
+
+=head1 SYNOPSIS
+
+Preparing L<Digital::Driver> class:
+
+  package DigitalX::MyDriver;
+
+  use Digital::Driver;
+
+  to K => sub { ( ( $_ * 4.88 ) - 25 ) / 10 };
+  to C => sub { $_ - 273.15 }, 'K';
+  to F => sub { ( $_ * ( 9 / 5 ) ) - 459.67 }, 'K';
+
+  1;
+
+Using driver class:
+
+  use Digital qw( MyDriver );
+
+  my $digi = input( mydriver => 613 );
+  my $kelvin = $digi->K;  # 296.644
+  my $celsius = $digi->C; #  23.494
+
+=head1 DESCRIPTION
+
+=head1 SUPPORT
+
+IRC
+
+  Join #hardware on irc.perl.org. Highlight Getty for fast reaction :).
+
+Repository
+
+  https://github.com/homehivelab/p5-digital
+  Pull request and additional contributors are welcome
+
+Issue Tracker
+
+  https://github.com/homehivelab/p5-digital/issues
