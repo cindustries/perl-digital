@@ -1,0 +1,82 @@
+#!/usr/bin/env perl
+# PODNAME: digital_input
+# ABSTRACT: Calculate one input value through a Digital::Driver class
+
+$|=1;
+
+use strict;
+use warnings;
+use Module::Runtime qw( use_module );
+use lib "lib";
+use Time::HiRes qw( usleep );
+
+sub value {
+  my ( $class, $input, $function ) = @_;
+
+  if ($class =~ m/^\+(.*)/) {
+    $class = $1;
+  } else {
+    $class = 'DigitalX::'.$class;
+  }
+
+  my $digi = use_module($class)->input($input);
+
+  return $function ? $digi->$function : $digi+0;
+}
+
+my ( $class, $input, $function ) = @ARGV;
+
+eval {
+
+  if ($input =~ /^(\d*)-(\d*)$/) {
+    my $min = $1 || 0;
+    my $max = $2;
+    if ($max) {
+      my $length = length($max);
+      for ($min..$max) {
+        print sprintf('%'.($length).'.d',$_).': '.value($class, $_, $function)."\n";
+        usleep 100;
+      }
+    } else {
+      while (1) {
+        print $min.': '.value($class, $min, $function)."\n";
+        $min++;
+        usleep 100;
+      }
+    }
+  } else {
+    print value($class, $input, $function)."\n";  
+  }
+
+  exit 0;
+
+};
+
+print $@."\n" if $@;
+
+exit 1;
+
+=head1 SYNOPSIS
+
+  bash$ digital_input DigitalX::MyDriver 613
+  bash$ digital_input DigitalX::MyDriver 50-1000
+  bash$ digital_input DigitalX::MyDriver -1000
+  bash$ digital_input DigitalX::MyDriver 50- # endless
+  bash$ digital_input DigitalX::MyDriver 613 F
+
+=head1 DESCRIPTION
+
+=head1 SUPPORT
+
+IRC
+
+  Join #hardware on irc.perl.org. Highlight Getty for fast reaction :).
+
+Repository
+
+  https://github.com/homehivelab/p5-digital
+  Pull request and additional contributors are welcome
+
+Issue Tracker
+
+  https://github.com/homehivelab/p5-digital/issues
