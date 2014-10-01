@@ -4,6 +4,7 @@ package Digital::Driver;
 use strict;
 use warnings;
 use Package::Stash;
+use Carp qw( croak );
 use MooX ();
 use Digital ();
 
@@ -12,6 +13,7 @@ sub import {
   my $driver_role;
   for (@args) {
     if ($_ =~ m/^-(.+)/) {
+      croak $class.' already has a driver role' if $driver_role;
       $driver_role = 'Digital::Role::'.$1;
     }
   }
