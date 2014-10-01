@@ -6,6 +6,7 @@ use warnings;
 use Package::Stash;
 use Carp qw( croak );
 use MooX ();
+use Import::Into;
 use Digital ();
 
 sub import {
@@ -39,6 +40,14 @@ sub install_helper {
       my $value = defined $via ? $self->$via : $self->in;
       return $coderef->($self,$value) for ($value);
     });
+  });
+  $stash->add_symbol('&overload_to', sub {
+    my ( $to, @args ) = @_;
+    overload->import::into($target,
+      '0+', sub { shift->$to },
+      fallback => 1,
+    );
+    return $target->can('to')->($to, @args);
   });
 }
 

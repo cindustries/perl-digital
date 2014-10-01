@@ -50,7 +50,7 @@ Preparing L<Digital::Driver> class:
   use Digital::Driver;
 
   to K => sub { ( ( $_ * 4.88 ) - 25 ) / 10 };
-  to C => sub { $_ - 273.15 }, 'K';
+  overload_to C => sub { $_ - 273.15 }, 'K';
   to F => sub { ( $_ * ( 9 / 5 ) ) - 459.67 }, 'K';
 
   1;
@@ -62,6 +62,7 @@ Using driver class:
   my $digi = input( mydriver => 613 );
   my $kelvin = $digi->K;  # 296.644
   my $celsius = $digi->C; #  23.494
+  my $celsius = $digi+0;  # because of overload falls back to C
 
 =head1 DESCRIPTION
 
