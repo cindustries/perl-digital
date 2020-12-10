@@ -74,9 +74,9 @@ IRC
 
 Repository
 
-  https://github.com/homehivelab/p5-digital
+  https://github.com/cindustries/perl-digital
   Pull request and additional contributors are welcome
 
 Issue Tracker
 
-  https://github.com/homehivelab/p5-digital/issues
+  https://github.com/cindustries/perl-digital/issues
